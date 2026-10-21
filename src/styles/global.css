@@ -1,0 +1,65 @@
+:root {
+  --color-accent: #f78c38;
+  --color-accent-2: #181923;
+  --color-bg-body: #e9eaee;
+  --color-surface: #ffffff;
+  --color-border: #d4d6dd;
+  --color-text: #181923;
+  --color-title-text: #fff;
+  --color-text-muted: #5b5e6b;
+  --color-on-dark: #f3f4f6;
+  --color-on-dark-muted: #9a9dab;
+}
+
+@keyframes slide-right {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Primary button: an :after layer slides in from the left on hover */
+.btn {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-accent);
+  transform: translateX(-100%);
+}
+
+.btn:hover,
+.btn:focus-visible {
+  color: var(--color-accent-2);
+}
+
+.btn:hover::after,
+.btn:focus-visible::after {
+  animation: slide-right 0.3s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover::after,
+  .btn:focus-visible::after {
+    animation-duration: 0.01ms;
+  }
+}

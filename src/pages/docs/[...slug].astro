@@ -1,0 +1,152 @@
+---
+import { getCollection, render } from 'astro:content';
+import WikiLayout from '@layouts/WikiLayout.astro';
+import type { DocEntry } from '@config/types';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+  return docs.map((doc) => ({
+    params: { slug: doc.id },
+    props: { doc },
+  }));
+}
+
+interface Props {
+  doc: DocEntry;
+}
+
+const { doc } = Astro.props;
+const { Content } = await render(doc);
+---
+
+<WikiLayout title={doc.data.title}>
+  <article class="doc-content">
+    <Content />
+  </article>
+</WikiLayout>
+
+<style>
+  .doc-content {
+    max-width: 48rem;
+    padding: 2rem 2.5rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-text);
+    line-height: 1.7;
+  }
+
+  /* Markdown output is rendered by <Content />, so scoped styles need :global */
+  .doc-content :global(h1),
+  .doc-content :global(h2),
+  .doc-content :global(h3),
+  .doc-content :global(h4) {
+    color: var(--color-accent-2);
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .doc-content :global(h1) {
+    font-size: 2rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .doc-content :global(h2) {
+    font-size: 1.5rem;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--color-accent);
+  }
+
+  .doc-content :global(h3) {
+    font-size: 1.2rem;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .doc-content :global(p),
+  .doc-content :global(ul),
+  .doc-content :global(ol) {
+    margin: 0 0 1rem;
+  }
+
+  .doc-content :global(ul),
+  .doc-content :global(ol) {
+    padding-left: 1.5rem;
+  }
+
+  .doc-content :global(li + li) {
+    margin-top: 0.25rem;
+  }
+
+  .doc-content :global(a) {
+    color: var(--color-accent-2);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .doc-content :global(a:hover) {
+    background-color: var(--color-accent);
+  }
+
+  .doc-content :global(code) {
+    background-color: var(--color-bg-body);
+    color: var(--color-accent-2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+  }
+
+  .doc-content :global(pre) {
+    background-color: var(--color-accent-2);
+    color: var(--color-on-dark);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 0 0 1.25rem;
+    line-height: 1.5;
+  }
+
+  .doc-content :global(pre code) {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+
+  .doc-content :global(blockquote) {
+    margin: 0 0 1rem;
+    padding: 0.5rem 1rem;
+    border-left: 4px solid var(--color-accent);
+    background-color: rgba(247, 140, 56, 0.1);
+    color: var(--color-text);
+  }
+
+  .doc-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .doc-content :global(th),
+  .doc-content :global(td) {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+
+  .doc-content :global(th) {
+    background-color: var(--color-accent-2);
+    color: var(--color-on-dark);
+    font-weight: 600;
+  }
+
+  .doc-content :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 2rem 0;
+  }
+</style>

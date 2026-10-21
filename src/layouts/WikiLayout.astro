@@ -1,0 +1,116 @@
+---
+import {ClientRouter} from "astro:transitions"
+import WikiSidebar from "@components/WikiSidebar.astro";
+import type { BasicComponentProps } from "@config/types";
+import "../styles/global.css";
+type Props = BasicComponentProps;
+const {title, description = "Raona Internal Projects Wiki"} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title} | Wiki Interna</title>
+    
+    <ClientRouter />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-section start">
+        <slot name="topbar.start">
+          <a href="/" class="logo">Internal Wiki</a>
+        </slot>
+      </div>
+      
+      <div class="topbar-section center">
+        <slot name="topbar.center">
+        </slot>
+      </div>
+      
+      <div class="topbar-section end">
+        <slot name="topbar.end">
+        </slot>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <WikiSidebar />
+    </aside>
+
+    <main class="content">
+      <div class="content-wrapper">
+        <slot />
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  :root {
+    --topbar-height: 4rem;
+    --sidebar-width: 18rem;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--color-text);
+    background-color: var(--color-bg-body);
+    
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: var(--topbar-height) calc(100vh - var(--topbar-height));
+    height: 100vh;
+    overflow: hidden; 
+  }
+
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    background-color: var(--color-accent-2);
+    color: var(--color-on-dark);
+    border-bottom: 3px solid var(--color-accent);
+    z-index: 10;
+  }
+
+  .topbar-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .sidebar {
+    background-color: var(--color-accent-2);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .content {
+    overflow-y: auto;
+    padding: 2rem;
+    scroll-behavior: smooth;
+  }
+
+  .content-wrapper {
+    max-width: 65ch; /* Ideal reading width */
+    margin: 0 auto;
+    width: 100%;
+  }
+</style>
