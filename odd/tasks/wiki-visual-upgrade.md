@@ -15,7 +15,8 @@ Raise the wiki UI to the quality bar of modern developer docs (Vercel/Linear/Str
 - [x] T2 Shell: glass topbar, theme toggle, mobile drawer, sidebar polish + filter
 - [x] T3 Doc page: breadcrumb, header, TOC with scroll-spy, anchors, code copy, prev/next
 - [x] T4 Home: hero + group cards
-- [x] T5 Verify: astro check + build, visual check
+- [x] T5 Verify: astro check + build
+- [x] T6 Visual check (Edge headless): dark, light, mobile 390px OK; tweaked inline code weight
 
 ## Progress / evidence
 (branch `feat/wiki-visual-upgrade`)

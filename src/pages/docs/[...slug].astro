@@ -361,8 +361,15 @@ const next = index >= 0 && index < flat.length - 1 ? flat[index + 1] : undefined
     color: var(--color-text-strong);
     font-family: var(--font-mono);
     font-size: 0.84em;
-    font-weight: 500;
+    font-weight: 450;
     overflow-wrap: anywhere;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .prose :global(:is(h1, h2, h3, h4) code) {
+    font-size: 0.8em;
+    font-weight: 600;
   }
 
   /* Code blocks (wrapped by wiki.ts) */
