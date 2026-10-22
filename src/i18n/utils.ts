@@ -22,10 +22,17 @@ export const getLocale = (current: string | undefined): Locale =>
 /** Locales that carry a URL prefix (everything but the default). */
 export const prefixedLocales = locales.filter((l) => l !== defaultLocale);
 
-/** `/es/docs/auth/` -> `/docs/auth/`; paths without a locale prefix are returned unchanged. */
+/** Site `base` without a trailing slash (`''` when served from the root). */
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+
+/**
+ * `/<base>/es/docs/auth/` -> `/docs/auth/`. Removes the site `base` and the locale
+ * prefix, so the result can be fed back to `localizedUrl()` (which re-adds both).
+ */
 export function stripLocale(pathname: string): string {
-  const match = pathname.match(new RegExp(`^/(${prefixedLocales.join('|')})(?=/|$)`));
-  return match ? pathname.slice(match[0].length) || '/' : pathname;
+  const path = base && pathname.startsWith(base) ? pathname.slice(base.length) || '/' : pathname;
+  const match = path.match(new RegExp(`^/(${prefixedLocales.join('|')})(?=/|$)`));
+  return match ? path.slice(match[0].length) || '/' : path;
 }
 
 /** Locale-aware URL for a locale-less path (e.g. `/docs/auth`). */
