@@ -1,7 +1,7 @@
 ---
-title: Admin 
+title: Admin
 navGroup: Features
-order: 1
+order: 5
 ---
 # Admin features (`src/features/admin`)
 

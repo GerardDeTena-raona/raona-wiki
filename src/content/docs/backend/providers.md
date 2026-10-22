@@ -1,7 +1,7 @@
 ---
 title: Providers
 navGroup: Backend
-order: 3
+order: 2
 ---
 # Backend providers (`src/backend`)
 

@@ -1,7 +1,7 @@
 ---
 title: Testing
-navGroup: Testing
-order: 1
+navGroup: Styling & Testing
+order: 2
 ---
 # Testing
 

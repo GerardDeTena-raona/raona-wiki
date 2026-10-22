@@ -1,7 +1,7 @@
 ---
 title: Processes
 navGroup: Features
-order: 5
+order: 2
 ---
 # Processes feature (`src/features/processes`)
 

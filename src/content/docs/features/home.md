@@ -1,7 +1,7 @@
 ---
 title: Home
 navGroup: Features
-order: 3
+order: 1
 ---
 # Home feature (`src/features/home`)
 

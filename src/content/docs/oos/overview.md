@@ -1,7 +1,7 @@
 ---
 title: Overview
-navGroup: Out-Of-Scope (OOS) 
-order: 2
+navGroup: Out-of-Scope (OOS)
+order: 1
 ---
 # Out-of-scope (OOS) module overview (`src/oos`)
 

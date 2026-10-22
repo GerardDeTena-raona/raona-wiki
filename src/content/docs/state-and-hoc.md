@@ -1,7 +1,7 @@
 ---
-title: State & HOC
-navGroup: State Management
-order: 1
+title: "State & HOC"
+navGroup: Architecture
+order: 3
 ---
 # State (store) and higher-order components
 

@@ -1,6 +1,6 @@
 ---
-title: UI
-navGroup: Out-Of-Scope (OOS)
+title: User Interface
+navGroup: Out-of-Scope (OOS)
 order: 3
 ---
 # OOS user interface

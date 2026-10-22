@@ -1,6 +1,6 @@
 ---
 title: Authentication
-navGroup: Authentication
+navGroup: Core Services
 order: 1
 ---
 # Authentication

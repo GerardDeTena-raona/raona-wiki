@@ -1,6 +1,6 @@
 ---
-title: Arquitecture
-navGroup: Arquitecture
+title: Extension Framework
+navGroup: Architecture
 order: 1
 ---
 # Extension framework and app shell
