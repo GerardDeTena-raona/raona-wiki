@@ -1,7 +1,7 @@
 ---
 title: Mock Backend
 navGroup: Backend
-order: 2
+order: 3
 ---
 # Mock backend (`src/backend/providers/mock`)
 

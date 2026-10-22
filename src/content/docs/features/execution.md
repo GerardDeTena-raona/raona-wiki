@@ -1,7 +1,7 @@
 ---
 title: Execution
 navGroup: Features
-order: 2
+order: 4
 ---
 # Execution feature (`src/features/execution`)
 

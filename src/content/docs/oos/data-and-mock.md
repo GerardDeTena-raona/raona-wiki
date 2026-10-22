@@ -1,7 +1,7 @@
 ---
-title: Data & Mock
-navGroup: Out-Of-Scope (OOS)
-order: 1
+title: "Data & Mock Schedule"
+navGroup: Out-of-Scope (OOS)
+order: 2
 ---
 # OOS data, mock schedule and helpers
 

@@ -1,6 +1,6 @@
 ---
 title: Contracts
-navGroup: Backend 
+navGroup: Backend
 order: 1
 ---
 # Backend contracts (`src/backend/contracts`)

@@ -1,7 +1,7 @@
 ---
-title: Configuration 
-navGroup: Configuration
-order: 1
+title: Configuration
+navGroup: Architecture
+order: 2
 ---
 # Configuration (`src/config`)
 

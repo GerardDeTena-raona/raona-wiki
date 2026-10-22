@@ -1,7 +1,7 @@
 ---
-title: Shared
-navGroup: Shared
-order: 1
+title: Shared Code
+navGroup: Architecture
+order: 4
 ---
 # Shared code (`src/shared`)
 

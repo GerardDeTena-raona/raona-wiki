@@ -1,7 +1,7 @@
 ---
 title: Process Detail
 navGroup: Features
-order: 4
+order: 3
 ---
 # Process detail feature (`src/features/process-detail`)
 

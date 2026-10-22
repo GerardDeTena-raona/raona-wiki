@@ -1,6 +1,6 @@
 ---
-title: Styles
-navGroup: Styles
+title: Styling
+navGroup: Styling & Testing
 order: 1
 ---
 # Styles (`src/styles`)
