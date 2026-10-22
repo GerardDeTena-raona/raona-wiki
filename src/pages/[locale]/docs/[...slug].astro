@@ -1,0 +1,16 @@
+---
+import { getCollection } from 'astro:content';
+import DocPage from '@components/DocPage.astro';
+import { getLocale, hasLocalePrefix, prefixedLocales } from '@i18n/utils';
+
+export async function getStaticPaths() {
+  const docs = (await getCollection('docs')).filter((doc) => !hasLocalePrefix(doc.id));
+  return prefixedLocales.flatMap((locale) =>
+    docs.map((doc) => ({ params: { locale, slug: doc.id } })),
+  );
+}
+
+const { locale, slug } = Astro.params;
+---
+
+<DocPage locale={getLocale(locale)} slug={slug!} />

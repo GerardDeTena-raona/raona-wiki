@@ -1,7 +1,11 @@
 ---
 import { getNavGroups } from '@config/nav';
+import { useTranslations } from '@i18n/ui';
+import { getLocale, localizedUrl, samePath } from '@i18n/utils';
 
-const navGroups = await getNavGroups();
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const navGroups = await getNavGroups(locale);
 
 const currentPath = Astro.url.pathname;
 ---
@@ -12,26 +16,26 @@ const currentPath = Astro.url.pathname;
     type="search"
     class="search-input"
     data-nav-filter
-    placeholder="Filter docs"
-    aria-label="Filter documentation"
+    placeholder={t('nav.filter')}
+    aria-label={t('nav.filterLabel')}
     autocomplete="off"
     spellcheck="false"
   />
   <kbd class="search-kbd" aria-hidden="true">/</kbd>
 </div>
 
-<nav class="sidebar-nav" aria-label="Documentation">
-  {navGroups.map(([groupName, docs]) => (
+<nav class="sidebar-nav" aria-label={t('nav.label')}>
+  {navGroups.map(({ label, docs }) => (
     <details class="nav-group" open>
       <summary class="nav-group-title">
         <svg class="chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-        <span class="group-name">{groupName}</span>
+        <span class="group-name">{label}</span>
         <span class="group-count">{docs.length}</span>
       </summary>
       <ul class="nav-list">
         {docs.map(doc => {
-          const docPath = `/docs/${doc.id}`;
-          const isActive = currentPath === docPath || currentPath === `${docPath}/`;
+          const docPath = localizedUrl(locale, `/docs/${doc.slug}`);
+          const isActive = samePath(currentPath, docPath);
 
           return (
             <li class="nav-item">
@@ -40,7 +44,7 @@ const currentPath = Astro.url.pathname;
                 class={`nav-link ${isActive ? 'active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                {doc.data.title}
+                {doc.title}
               </a>
             </li>
           );
@@ -48,7 +52,7 @@ const currentPath = Astro.url.pathname;
       </ul>
     </details>
   ))}
-  <p class="nav-empty" data-nav-empty hidden>No docs match your filter.</p>
+  <p class="nav-empty" data-nav-empty hidden>{t('nav.empty')}</p>
 </nav>
 
 <style>
