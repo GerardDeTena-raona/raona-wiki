@@ -7,7 +7,8 @@
       "@components/*": ["./src/components/*"],
       "@layouts/*": ["./src/layouts/*"],
       "@assets/*": ["./src/assets/*"],
-      "@config/*": ["./src/config/*"]
+      "@config/*": ["./src/config/*"],
+      "@i18n/*": ["./src/i18n/*"]
     },
     "verbatimModuleSyntax": true
   }
