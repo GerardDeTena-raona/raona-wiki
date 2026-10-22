@@ -8,6 +8,10 @@ type Theme = 'dark' | 'light';
 
 const root = document.documentElement;
 
+/** UI strings are rendered server-side into `<body data-*>` so the script stays locale-agnostic. */
+const uiText = (key: 'copy' | 'copied' | 'copyAria' | 'copyFail' | 'anchor', fallback: string) =>
+  document.body.dataset[key] ?? fallback;
+
 const systemTheme = (): Theme =>
   window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
@@ -150,7 +154,7 @@ function initAnchors(article: HTMLElement) {
     link.className = 'anchor';
     link.href = `#${heading.id}`;
     link.textContent = '#';
-    link.setAttribute('aria-label', `Link to “${heading.textContent}”`);
+    link.setAttribute('aria-label', `${uiText('anchor', 'Link to section')}: ${heading.textContent}`);
     heading.append(link);
   });
 }
@@ -173,21 +177,21 @@ function initCodeBlocks(article: HTMLElement) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'code-copy';
-    button.innerHTML = `${COPY_ICON}<span>Copy</span>`;
-    button.setAttribute('aria-label', 'Copy code to clipboard');
+    button.innerHTML = `${COPY_ICON}<span>${uiText('copy', 'Copy')}</span>`;
+    button.setAttribute('aria-label', uiText('copyAria', 'Copy code to clipboard'));
 
     let timer: number | undefined;
     button.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(pre.textContent ?? '');
-        button.innerHTML = `${CHECK_ICON}<span>Copied</span>`;
+        button.innerHTML = `${CHECK_ICON}<span>${uiText('copied', 'Copied')}</span>`;
         button.dataset.state = 'copied';
       } catch {
-        button.innerHTML = '<span>Press Ctrl+C</span>';
+        button.innerHTML = `<span>${uiText('copyFail', 'Press Ctrl+C')}</span>`;
       }
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
-        button.innerHTML = `${COPY_ICON}<span>Copy</span>`;
+        button.innerHTML = `${COPY_ICON}<span>${uiText('copy', 'Copy')}</span>`;
         delete button.dataset.state;
       }, 1800);
     });

@@ -1,0 +1,64 @@
+---
+import { useTranslations } from '@i18n/ui';
+import {
+  getLocale,
+  localeLabels,
+  locales,
+  localizedUrl,
+  stripLocale,
+} from '@i18n/utils';
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+// Same page, other language: swap the prefix, keep the rest of the path.
+const rest = stripLocale(Astro.url.pathname);
+---
+
+<nav class="lang-switch" aria-label={t('lang.label')}>
+  {locales.map((code) => (
+    <a
+      href={localizedUrl(code, rest)}
+      class={code === locale ? 'active' : undefined}
+      lang={code}
+      hreflang={code}
+      title={localeLabels[code]}
+      aria-label={localeLabels[code]}
+      aria-current={code === locale ? 'true' : undefined}
+      data-astro-prefetch="hover"
+    >
+      {code}
+    </a>
+  ))}
+</nav>
+
+<style>
+  .lang-switch {
+    display: inline-flex;
+    padding: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-body);
+  }
+
+  a {
+    padding: 0.3rem 0.55rem;
+    border-radius: calc(var(--radius-md) - 2px);
+    color: var(--color-text-muted);
+    font: 600 0.72rem/1 var(--font-mono);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  a:hover {
+    color: var(--color-text-strong);
+  }
+
+  a.active {
+    color: var(--color-accent-2);
+    background-color: var(--color-accent);
+  }
+</style>

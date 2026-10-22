@@ -1,0 +1,232 @@
+---
+import WikiLayout from '@layouts/WikiLayout.astro';
+import { getNavGroups } from '@config/nav';
+import { useTranslations } from '@i18n/ui';
+import { localizedUrl, type Locale } from '@i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const groups = await getNavGroups(locale);
+const totalDocs = groups.reduce((sum, group) => sum + group.docs.length, 0);
+const first = groups[0]?.docs[0];
+const docUrl = (slug: string) => localizedUrl(locale, `/docs/${slug}`);
+---
+
+<WikiLayout title={t('home.title')}>
+  <div class="home">
+    <section class="hero">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> {t('home.eyebrow')}</p>
+      <h1>{t('home.heading1')}<br /><span class="grad">{t('home.heading2')}</span></h1>
+      <p class="lede">{t('home.lede')}</p>
+      <div class="hero-actions">
+        {first && <a class="btn" href={docUrl(first.slug)}>{t('home.start')} <span aria-hidden="true">→</span></a>}
+        <span class="meta"><kbd>/</kbd> {t('home.filterHint')} · {totalDocs} {t('home.docs')} · {groups.length} {t('home.sections')}</span>
+      </div>
+    </section>
+
+    <section class="grid" aria-label={t('home.sectionsLabel')}>
+      {groups.map(({ label, docs }, i) => (
+        <article class="card" style={`--i:${i}`}>
+          <header class="card-head">
+            <h2>{label}</h2>
+            <span class="count">{docs.length}</span>
+          </header>
+          <ul>
+            {docs.map((doc) => (
+              <li><a href={docUrl(doc.slug)}>{doc.title}</a></li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </section>
+  </div>
+</WikiLayout>
+
+<style>
+  .home {
+    max-width: 66rem;
+    margin: 0 auto;
+  }
+
+  .hero {
+    padding: clamp(1.5rem, 6vw, 4rem) 0 clamp(2rem, 5vw, 3.5rem);
+    animation: rise 0.6s var(--ease-out) both;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 1.25rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 999px;
+    background-color: var(--color-glass);
+    color: var(--color-text-muted);
+    font: 500 0.75rem/1.4 var(--font-mono);
+  }
+
+  .dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft), 0 0 12px var(--color-accent);
+  }
+
+  h1 {
+    margin: 0 0 1.25rem;
+    color: var(--color-text-strong);
+    font-size: clamp(2.4rem, 6vw, 4.25rem);
+    font-weight: 750;
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+
+  .grad {
+    background: linear-gradient(100deg, #ffc08a, var(--color-accent) 50%, #e8711a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lede {
+    max-width: 38rem;
+    margin: 0 0 2rem;
+    color: var(--color-text-muted);
+    font-size: clamp(1.02rem, 1.6vw, 1.2rem);
+    line-height: 1.6;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .meta {
+    color: var(--color-text-faint);
+    font: 500 0.78rem/1.4 var(--font-mono);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    position: relative;
+    padding: 1.15rem 1.2rem 1rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    animation: rise 0.55s var(--ease-out) both;
+    animation-delay: calc(var(--i) * 45ms + 120ms);
+    transition:
+      border-color var(--dur) ease,
+      transform var(--dur) var(--ease-out);
+  }
+
+  /* Cursor-agnostic top glow that lights up on hover */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0;
+    transition: opacity var(--dur) ease;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    border-color: var(--color-border-strong);
+    transform: translateY(-3px);
+  }
+
+  .card:hover::before,
+  .card:focus-within::before {
+    opacity: 1;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+
+  .card h2 {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .count {
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent-text);
+    font: 600 0.72rem/1.7 var(--font-mono);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.5rem;
+    margin: 0 -0.5rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  li a::after {
+    content: '→';
+    color: var(--color-accent);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition:
+      opacity var(--dur-fast) ease,
+      transform var(--dur) var(--ease-out);
+  }
+
+  li a:hover {
+    color: var(--color-text-strong);
+    background-color: var(--color-surface-hover);
+  }
+
+  li a:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+</style>
