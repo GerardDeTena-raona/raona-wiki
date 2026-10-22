@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import WikiLayout from '@layouts/WikiLayout.astro';
+import { getNavGroups } from '@config/nav';
 import type { DocEntry } from '@config/types';
 
 export async function getStaticPaths() {
@@ -16,137 +17,524 @@ interface Props {
 }
 
 const { doc } = Astro.props;
-const { Content } = await render(doc);
+const { Content, headings } = await render(doc);
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const group = doc.data.navGroup?.trim() || 'General';
+
+// Pager follows sidebar order
+const flat = (await getNavGroups()).flatMap(([, docs]) => docs);
+const index = flat.findIndex((d) => d.id === doc.id);
+const prev = index > 0 ? flat[index - 1] : undefined;
+const next = index >= 0 && index < flat.length - 1 ? flat[index + 1] : undefined;
 ---
 
 <WikiLayout title={doc.data.title}>
-  <article class="doc-content">
-    <Content />
-  </article>
+  <div class="doc-layout">
+    <article class="doc">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Wiki</a>
+        <span class="sep" aria-hidden="true">/</span>
+        <span>{group}</span>
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="current" aria-current="page">{doc.data.title}</span>
+      </nav>
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      {(prev || next) && (
+        <nav class="pager" aria-label="Previous and next document">
+          {prev ? (
+            <a class="pager-link prev" href={`/docs/${prev.id}`} rel="prev">
+              <span class="pager-label">← Previous</span>
+              <span class="pager-title">{prev.data.title}</span>
+            </a>
+          ) : <span />}
+          {next ? (
+            <a class="pager-link next" href={`/docs/${next.id}`} rel="next">
+              <span class="pager-label">Next →</span>
+              <span class="pager-title">{next.data.title}</span>
+            </a>
+          ) : <span />}
+        </nav>
+      )}
+    </article>
+
+    {toc.length > 0 && (
+      <aside class="toc" aria-label="On this page">
+        <p class="toc-title">On this page</p>
+        <ul class="toc-list">
+          {toc.map((h) => (
+            <li class={`toc-item depth-${h.depth}`}>
+              <a class="toc-link" href={`#${h.slug}`}>{h.text}</a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+  </div>
 </WikiLayout>
 
 <style>
-  .doc-content {
-    max-width: 48rem;
-    padding: 2rem 2.5rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    color: var(--color-text);
-    line-height: 1.7;
+  .doc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 46rem) 14.5rem;
+    justify-content: center;
+    gap: 3.5rem;
+    max-width: 66rem;
+    margin: 0 auto;
   }
 
-  /* Markdown output is rendered by <Content />, so scoped styles need :global */
-  .doc-content :global(h1),
-  .doc-content :global(h2),
-  .doc-content :global(h3),
-  .doc-content :global(h4) {
-    color: var(--color-accent-2);
-    line-height: 1.25;
-    font-weight: 700;
+  .doc {
+    min-width: 0;
+    animation: rise 0.5s var(--ease-out) both;
   }
 
-  .doc-content :global(h1) {
-    font-size: 2rem;
-    margin: 0 0 1.5rem;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
   }
 
-  .doc-content :global(h2) {
-    font-size: 1.5rem;
-    margin: 2.5rem 0 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 2px solid var(--color-accent);
+  /* ---------- Breadcrumb ---------- */
+
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-faint);
+    font: 500 0.78rem/1.4 var(--font-mono);
   }
 
-  .doc-content :global(h3) {
-    font-size: 1.2rem;
-    margin: 2rem 0 0.75rem;
-  }
-
-  .doc-content :global(p),
-  .doc-content :global(ul),
-  .doc-content :global(ol) {
-    margin: 0 0 1rem;
-  }
-
-  .doc-content :global(ul),
-  .doc-content :global(ol) {
-    padding-left: 1.5rem;
-  }
-
-  .doc-content :global(li + li) {
-    margin-top: 0.25rem;
-  }
-
-  .doc-content :global(a) {
-    color: var(--color-accent-2);
-    font-weight: 500;
-    text-decoration: underline;
-    text-decoration-color: var(--color-accent);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-    transition: background-color 0.2s ease-in-out;
-  }
-
-  .doc-content :global(a:hover) {
-    background-color: var(--color-accent);
-  }
-
-  .doc-content :global(code) {
-    background-color: var(--color-bg-body);
-    color: var(--color-accent-2);
-    padding: 0.15rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-  }
-
-  .doc-content :global(pre) {
-    background-color: var(--color-accent-2);
-    color: var(--color-on-dark);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    overflow-x: auto;
-    margin: 0 0 1.25rem;
-    line-height: 1.5;
-  }
-
-  .doc-content :global(pre code) {
-    background: none;
+  .breadcrumb a {
     color: inherit;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--color-accent-text);
+  }
+
+  .breadcrumb .current {
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb .sep {
+    opacity: 0.5;
+  }
+
+  /* ---------- TOC ---------- */
+
+  .toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: calc(100vh - var(--topbar-height) - 5rem);
+    overflow-y: auto;
+    padding-top: 2.25rem;
+    font-size: 0.8125rem;
+  }
+
+  .toc-title {
+    margin: 0 0 0.75rem;
+    color: var(--color-text-strong);
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .toc-list {
+    margin: 0;
     padding: 0;
+    list-style: none;
+    border-left: 1px solid var(--color-border);
   }
 
-  .doc-content :global(blockquote) {
-    margin: 0 0 1rem;
-    padding: 0.5rem 1rem;
-    border-left: 4px solid var(--color-accent);
-    background-color: rgba(247, 140, 56, 0.1);
-    color: var(--color-text);
+  .toc-link {
+    position: relative;
+    display: block;
+    padding: 0.28rem 0 0.28rem 0.9rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    line-height: 1.4;
+    transition: color var(--dur-fast) ease;
   }
 
-  .doc-content :global(table) {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 0 1.25rem;
-    font-size: 0.95rem;
+  .toc-item.depth-3 .toc-link {
+    padding-left: 1.75rem;
+    font-size: 0.78rem;
   }
 
-  .doc-content :global(th),
-  .doc-content :global(td) {
-    border: 1px solid var(--color-border);
-    padding: 0.5rem 0.75rem;
-    text-align: left;
+  .toc-link:hover {
+    color: var(--color-text-strong);
   }
 
-  .doc-content :global(th) {
-    background-color: var(--color-accent-2);
-    color: var(--color-on-dark);
+  .toc-link.active {
+    color: var(--color-accent-text);
     font-weight: 600;
   }
 
-  .doc-content :global(hr) {
+  .toc-link.active::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    width: 2px;
+    border-radius: 2px;
+    background-color: var(--color-accent);
+  }
+
+  /* ---------- Pager ---------- */
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) ease,
+      transform var(--dur) var(--ease-out),
+      box-shadow var(--dur) ease;
+  }
+
+  .pager-link.next {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .pager-link:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .pager-label {
+    color: var(--color-text-faint);
+    font: 500 0.75rem/1.4 var(--font-mono);
+  }
+
+  .pager-title {
+    color: var(--color-text-strong);
+    font-weight: 600;
+  }
+
+  /* ---------- Prose (rendered Markdown, so :global) ---------- */
+
+  .prose {
+    color: var(--color-text);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .prose :global(h1),
+  .prose :global(h2),
+  .prose :global(h3),
+  .prose :global(h4) {
+    position: relative;
+    color: var(--color-text-strong);
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .prose :global(h1) {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    background: linear-gradient(120deg, var(--color-text-strong) 40%, var(--color-accent-text));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .prose :global(h2) {
+    margin: 3rem 0 1rem;
+    padding-bottom: 0.55rem;
+    font-size: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .prose :global(h2)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 3rem;
+    height: 2px;
+    background-color: var(--color-accent);
+  }
+
+  .prose :global(h3) {
+    margin: 2.25rem 0 0.75rem;
+    font-size: 1.2rem;
+  }
+
+  .prose :global(h4) {
+    margin: 1.75rem 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .prose :global(.anchor) {
+    margin-left: 0.5rem;
+    color: var(--color-accent-text);
+    font-weight: 500;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity var(--dur-fast) ease;
+  }
+
+  .prose :global(h2:hover .anchor),
+  .prose :global(h3:hover .anchor),
+  .prose :global(h4:hover .anchor),
+  .prose :global(.anchor:focus-visible) {
+    opacity: 1;
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.1rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.5rem;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.35rem;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--color-accent);
+  }
+
+  .prose :global(strong) {
+    color: var(--color-text-strong);
+    font-weight: 650;
+  }
+
+  .prose :global(a) {
+    color: var(--color-accent-text);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    transition:
+      text-decoration-color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  .prose :global(a:hover) {
+    text-decoration-color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+  }
+
+  /* Inline code */
+  .prose :global(:not(pre) > code) {
+    padding: 0.14rem 0.42rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background-color: var(--color-inline-code-bg);
+    color: var(--color-text-strong);
+    font-family: var(--font-mono);
+    font-size: 0.84em;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  /* Code blocks (wrapped by wiki.ts) */
+  .prose :global(.code-block) {
+    margin: 0 0 1.4rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-code-bg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .prose :global(.code-bar) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.35rem;
+    padding: 0.25rem 0.5rem 0.25rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background-color: color-mix(in srgb, var(--color-surface) 70%, var(--color-code-bg));
+  }
+
+  .prose :global(.code-lang) {
+    color: var(--color-text-faint);
+    font: 500 0.72rem/1 var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .prose :global(.code-copy) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font: 500 0.75rem/1 var(--font-sans);
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease;
+  }
+
+  .prose :global(.code-copy:hover) {
+    color: var(--color-text-strong);
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-border);
+  }
+
+  .prose :global(.code-copy[data-state='copied']) {
+    color: #3fb950;
+  }
+
+  .prose :global(pre) {
+    margin: 0 0 1.4rem;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    background-color: var(--color-code-bg) !important;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  .prose :global(.code-block pre) {
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .prose :global(pre code) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+    font-weight: 400;
+  }
+
+  /* Quotes act as callouts */
+  .prose :global(blockquote) {
+    margin: 0 0 1.25rem;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background-color: var(--color-accent-soft);
+    color: var(--color-text);
+  }
+
+  .prose :global(blockquote > :last-child) {
+    margin-bottom: 0;
+  }
+
+  /* Tables */
+  .prose :global(table) {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    max-width: 100%;
+    margin: 0 0 1.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  .prose :global(th) {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-strong);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .prose :global(tbody tr) {
+    transition: background-color var(--dur-fast) ease;
+  }
+
+  .prose :global(tbody tr:hover) {
+    background-color: var(--color-inline-code-bg);
+  }
+
+  .prose :global(hr) {
     border: 0;
     border-top: 1px solid var(--color-border);
-    margin: 2rem 0;
+    margin: 2.5rem 0;
+  }
+
+  .prose :global(img) {
+    max-width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  @media (max-width: 1180px) {
+    .doc-layout {
+      grid-template-columns: minmax(0, 46rem);
+    }
+
+    .toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+
+    .pager-link.next {
+      grid-column: 1;
+    }
   }
 </style>
